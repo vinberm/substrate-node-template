@@ -7,7 +7,6 @@ pub use pallet::*;
 pub mod pallet {
     use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
     use frame_system::pallet_prelude::*;
-	use frame_system::Config;
     use sp_std::vec::Vec;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -114,7 +113,7 @@ pub mod pallet {
 		#[pallet::weight(10_000)]
 		fn transfer_proof(
 			origin: OriginFor<T>,
-			acc: AccountId,
+			acc: T::AccountId,
 			proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			// Check that the extrinsic was signed and get the signer.
@@ -130,11 +129,6 @@ pub mod pallet {
 
 			// Verify that sender of the current call is the claim owner.
 			ensure!(sender == owner, Error::<T>::NotProofOwner);
-			// Remove claim from storage.
-			Proofs::<T>::remove(&proof);
-
-			// Verify that the specified proof has not already been claimed.
-			ensure!(!Proofs::<T>::contains_key(&proof), Error::<T>::ProofAlreadyClaimed);
 
 			// Get the block number from the FRAME System module.
 			let current_block = <frame_system::Module<T>>::block_number();
