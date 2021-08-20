@@ -19,6 +19,9 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		#[pallet::constant]
+		type StringLimit:  Get<u32>;
 	}
 
 	#[pallet::pallet]
@@ -47,6 +50,7 @@ pub mod pallet {
 		ProofAlreadyExist,
 		ClaimNotExist,
 		NotClaimOwner,
+		BadMetadata,
 	}
 
 	#[pallet::hooks]
@@ -59,6 +63,7 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			ensure!(!Proofs::<T>::contains_key(&claim), Error::<T>::ProofAlreadyExist);
+			ensure!(claim.len() <= T::StringLimit::get() as usize, Error::<T>::BadMetadata);
 
 			Proofs::<T>::insert(&claim, (sender.clone(), frame_system::Pallet::<T>::block_number()));
 
@@ -67,9 +72,12 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+
 		#[pallet::weight(0)]
 		pub fn revoke_claim(origin: OriginFor<T>, claim: Vec<u8>) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
+
+			ensure!(claim.len() <= T::StringLimit::get() as usize, Error::<T>::BadMetadata);
 
 			let (owner, _) = Proofs::<T>::get(&claim).ok_or(Error::<T>::ClaimNotExist)?;
 
@@ -85,6 +93,8 @@ pub mod pallet {
 		#[pallet::weight(0)]
 		pub fn transfer_claim(origin: OriginFor<T>, claim: Vec<u8>, dest: T::AccountId) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
+
+			ensure!(claim.len() <= T::StringLimit::get() as usize, Error::<T>::BadMetadata);
 
 			let (owner, _block_number) = Proofs::<T>::get(&claim).ok_or(Error::<T>::ClaimNotExist)?;
 

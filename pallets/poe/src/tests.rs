@@ -10,6 +10,7 @@ fn create_claim_works() {
 		assert_eq!(Proofs::<Test>::get(&claim), Some((1, frame_system::Pallet::<Test>::block_number())));
 	})
 }
+
 #[test]
 fn create_claim_failed_when_claim_already_exist() {
 	new_test_ext().execute_with(|| {
@@ -19,6 +20,18 @@ fn create_claim_failed_when_claim_already_exist() {
 		assert_noop!(
             PoeModule::create_claim(Origin::signed(1), claim.clone()),
             Error::<Test>::ProofAlreadyExist
+        );
+	})
+}
+
+#[test]
+fn create_claim_failed_when_exceed_length() {
+	new_test_ext().execute_with(|| {
+		let claim = vec![1; 333];
+
+		assert_noop!(
+            PoeModule::create_claim(Origin::signed(1), claim.clone()),
+            Error::<Test>::BadMetadata
         );
 	})
 }

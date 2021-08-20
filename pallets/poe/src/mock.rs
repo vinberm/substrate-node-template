@@ -24,6 +24,7 @@ frame_support::construct_runtime!(
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub const SS58Prefix: u8 = 42;
+	pub const StringLimit: u32 = 50;
 }
 
 impl system::Config for Test {
@@ -41,6 +42,7 @@ impl system::Config for Test {
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
 	type Event = Event;
+//	type StringLimit = StringLimit;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -53,6 +55,7 @@ impl system::Config for Test {
 
 impl pallet_poe::Config for Test {
 	type Event = Event;
+	type StringLimit = StringLimit;
 }
 
 // BUild genesis storage according to the mock runtime.
